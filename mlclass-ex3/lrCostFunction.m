@@ -35,15 +35,17 @@ grad = zeros(size(theta));
 %           temp(1) = 0;   % because we don't add anything for j = 0  
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
+theta_multiplier = eye(length(theta));
+theta_multiplier(1,1) = 0;
 
+regularized_theta = theta_multiplier * theta;
 
+J =  (1/m) * (log(sigmoid(theta'*X'))*(-y) \
+     - log(1 - sigmoid(theta'*X'))*(1 - y)) \
+     + (lambda / (2*m)) *(regularized_theta' * regularized_theta);
 
-
-
-
-
-
-
+grad = (1/m) * (((sigmoid(theta'*X')) - y')*X)';
+grad = grad + (lambda / m) * (theta_multiplier * theta);
 
 % =============================================================
 
