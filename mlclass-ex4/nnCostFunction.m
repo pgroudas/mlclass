@@ -40,28 +40,20 @@ Theta2_grad = zeros(size(Theta2));
 %         computed in ex4.m
 %
 labels = eye(num_labels);
+
+a_1 = [ones(size(X(:,1))) X];
+z_2 = a_1 * Theta1';
+a_2 = [ones(size(z_2(:,1))) sigmoid(z_2)];
+z_3 = a_2 * Theta2';
+a_3 = sigmoid(z_3);
+h_x = a_3;
+
+Y = zeros(num_labels,m);
 for i = 1:m
-  a_1 = [1 X(i,:)]';
-  z_2 = Theta1 * a_1;
-  a_2 = [1; sigmoid(z_2)];
-  z_3 = Theta2 * a_2;
-  a_3 = sigmoid(z_3);
-
-  h = a_3;
-  y_i = labels(:,y(i));
-
-  J = J + ( -y_i' * log(h) - (1 - y_i') * log(1 - h));
-
-
-% setting deltas
-  delta_3 = a_3 - y_i;
-  delta_2 = (Theta2)' * delta_3 .* [1; sigmoidGradient(z_2)];
-  delta_2 = delta_2(2:end);
-
-  Theta1_grad = Theta1_grad + delta_2 * a_1';
-  Theta2_grad = Theta2_grad + delta_3 * a_2';
-
+  Y(:,i) = labels(:,y(i));
 endfor
+
+J = J + sum(sum((log(h_x)*(-Y) - (log(1-h_x)*(1-Y))) .* eye(m)));
 
 J = J / m;
 
@@ -69,11 +61,17 @@ reg_term = 0;
 reg_theta1 = Theta1(:,2:end);
 reg_theta2 = Theta2(:,2:end);
 
-
 reg_term = (lambda / (2 * m)) * ...
   ((sum(sum(reg_theta1 .^2))) + (sum(sum(reg_theta2 .^2))));
 
 J = J + reg_term;
+
+delta_3 = a_3 - Y';
+delta_2 = delta_3 * Theta2 .* [ones(size(z_2(:,1))) sigmoidGradient(z_2)];
+delta_2 = delta_2(:,2:end);
+
+Theta1_grad = delta_2' * a_1;
+Theta2_grad = delta_3' * a_2;
 
 reg_theta1 = [zeros(size(Theta1(:,1))) Theta1(:,2:end)];
 reg_theta2 = [zeros(size(Theta2(:,1))) Theta2(:,2:end)];
